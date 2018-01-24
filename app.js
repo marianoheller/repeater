@@ -66,7 +66,7 @@ app.post('/repeat', function(req, res, next) {
   .catch((err) => {
     if( err.response ) console.log(err.response.status);
     else console.log(err);
-    res.status(502).send(err.code || err.response.status || 'NOCODE_ERROR :(');
+    res.status(Number(err.response.status)).send(err.code || err.response.status || 'NOCODE_ERROR :(');
   })
 })
 
