@@ -54,13 +54,18 @@ app.get('/', function(req, res, next) {
 
 app.post('/repeat', function(req, res, next) {
   if(!req.body || !req.body.targetURL ) return res.sendStatus(400);
+  console.log('');
+  console.log("=================================");
+  console.log("Repeating: " + req.body.targetURL);
+  console.log('');
+
   axios.get(req.body.targetURL)
   .then( (results) => {
     res.send(results.data);
   } )
   .catch((err) => {
     console.log(err);
-    res.status(502).send(err.code || 'NOCODE_ERROR :(');
+    res.status(502).send(err.code || err.response.status || 'NOCODE_ERROR :(');
   })
 })
 
