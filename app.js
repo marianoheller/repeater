@@ -34,8 +34,8 @@ app.get('/', function(req, res, next) {
 });
 
 app.post('/repeat', function(req, res, next) {
-  if(!req.body || !req.body.url ) return res.sendStatus(400);
-  axios.get(req.body.url)
+  if(!req.body || !req.body.targetURL ) return res.sendStatus(400);
+  axios.get(req.body.targetURL)
   .then( (results) => {
     res.send(results.data);
   } )
