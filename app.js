@@ -44,9 +44,9 @@ var allowCrossDomain = function(req, res, next) {
     next();
   }
 };
- */
+ 
 app.use(allowCrossDomain);
-
+*/
 
 app.get('/', function(req, res, next) {
   res.render('index');
