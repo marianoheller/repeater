@@ -6,13 +6,18 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var axios = require('axios');
 var cors = require('cors');
+var morgan = require('morgan')
 var request = require('request');
+var url = require('url');
 
 
 var app = express();
 
 //CORS
 app.use(cors());
+
+//Logging
+app.use(morgan('dev'));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -59,53 +64,41 @@ app.get('/', function(req, res, next) {
   res.render('index');
 });
 
-app.get('/repeat', myRepeatLogger,function( req, res, next) {
+app.get('/1/repeat', myRepeatLogger,function( req, res, next) {
   if(!req.query.url) return res.sendStatus(400);
-  var url = req.query.url;
-  var r = null;
-  try {
-    switch (req.method) {
-      case 'POST':
-        r = request.post({uri: url, json: req.body});  
-        break;
-      case 'PUT':
-        r = request.put({uri: url, json: req.body});
-        break;
-      case 'DELETE':
-        r = request.del({uri: url, json: req.body});
-        break;
-      default: //GET
-        r = request(url);
-        break;
-    }  
-  } catch (error) {
-    console.log(error);
-    return res.status(400).send(error.message);
-  }
+  const targetUrl = url.parse(req.query.url);
+  var r = request({ uri: targetUrl });
   
-  req.pipe(r).pipe(res);
+  r.pipe(res);
 })
 
 
-/* 
-app.post('/repeat_old', function(req, res, next) {
-  if(!req.body || !req.body.targetURL ) return res.sendStatus(400);
-  console.log('');
-  console.log("=================================");
-  console.log("Repeating: " + req.body.targetURL);
-  console.log('');
+app.get('/2/repeat',myRepeatLogger,  function(req, res, next) {
 
-  axios.get(req.body.targetURL)
+  axios.get(req.query.url)
   .then( (results) => {
     res.send(results.data);
   } )
-  .catch((err) => {
-    if( err.response ) console.log(err.response.status);
-    else console.log(err);
-    res.status(Number(err.response.status)).send(err.code || err.response.status || 'NOCODE_ERROR :(');
+  .catch((error) => {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
+    res.status(Number(error.response.status)).send(error.code || error.response.statusText || 'NOCODE_ERROR :(');
   })
 })
- */
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
