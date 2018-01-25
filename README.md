@@ -2,5 +2,6 @@
 
 
 
-To repeat send a POST to /repeat with json:
-`{ url: 'VALID_URL' }`
+To repeat send a GET to /repeat with query param named url.
+Example:
+`GET http://{BASE_URL}/repeat?url={VALID_URL}`

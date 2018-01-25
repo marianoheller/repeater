@@ -2,4 +2,6 @@ extends layout
 
 block content
   h1 Repeater
-  p To get a repeat do a POST to /repeat with json: { url: 'VALID_URL' }
+  p To repeat send a GET to /repeat with query param named url.
+  p Example:
+  p GET http://{BASE_URL}/repeat?url={VALID_URL}

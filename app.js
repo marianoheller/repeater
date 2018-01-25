@@ -6,6 +6,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var axios = require('axios');
 var cors = require('cors');
+var request = require('request');
+
 
 var app = express();
 
@@ -47,12 +49,46 @@ var allowCrossDomain = function(req, res, next) {
  
 app.use(allowCrossDomain);
 */
+const myRepeatLogger = function _myRepeatLogger( req, res, next) {
+  console.log('');
+  console.log("Repeating: " + req.query.url);
+  next();
+}
 
 app.get('/', function(req, res, next) {
   res.render('index');
 });
 
-app.post('/repeat', function(req, res, next) {
+app.get('/repeat', myRepeatLogger,function( req, res, next) {
+  if(!req.query.url) return res.sendStatus(400);
+  var url = req.query.url;
+  var r = null;
+  try {
+    switch (req.method) {
+      case 'POST':
+        r = request.post({uri: url, json: req.body});  
+        break;
+      case 'PUT':
+        r = request.put({uri: url, json: req.body});
+        break;
+      case 'DELETE':
+        r = request.del({uri: url, json: req.body});
+        break;
+      default: //GET
+        r = request(url);
+        break;
+    }  
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send(error.message);
+  }
+  
+  req.pipe(r).pipe(res);
+})
+
+
+/* 
+app.post('/repeat_old', function(req, res, next) {
   if(!req.body || !req.body.targetURL ) return res.sendStatus(400);
   console.log('');
   console.log("=================================");
@@ -69,7 +105,7 @@ app.post('/repeat', function(req, res, next) {
     res.status(Number(err.response.status)).send(err.code || err.response.status || 'NOCODE_ERROR :(');
   })
 })
-
+ */
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
