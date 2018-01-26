@@ -13,6 +13,17 @@ var url = require('url');
 
 var app = express();
 
+//Axios logging
+axios.interceptors.request.use(request => {
+  console.log('Starting Request', request)
+  return request
+})
+
+axios.interceptors.response.use(response => {
+  console.log('Response:', response.status, response.config.url)
+  return response
+})
+
 //CORS
 app.use(cors());
 
@@ -75,7 +86,7 @@ app.get('/1/repeat', myRepeatLogger,function( req, res, next) {
 
 app.get('/2/repeat',myRepeatLogger,  function(req, res, next) {
 
-  axios.get(req.query.url)
+  axios.get( url.parse(req.query.url).href )
   .then( (results) => {
     res.send(results.data);
   } )
@@ -83,19 +94,17 @@ app.get('/2/repeat',myRepeatLogger,  function(req, res, next) {
     if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+      return res.sendStatus(error.response.status);
     } else if (error.request) {
       // The request was made but no response was received
       // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
       // http.ClientRequest in node.js
-      console.log(error.request);
+      return res.sendStatus(502);
     } else {
       // Something happened in setting up the request that triggered an Error
       console.log('Error', error.message);
+      return res.status(500).send(error.message);
     }
-    res.status(Number(error.response.status)).send(error.code || error.response.statusText || 'NOCODE_ERROR :(');
   })
 })
 
